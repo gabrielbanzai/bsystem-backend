@@ -1,31 +1,25 @@
-# Usa a imagem oficial Node.js LTS (Gallium) baseada em Alpine
 FROM node:lts-alpine
 
-# Instala bash e utilitários de sistema
+# Instala bash e ferramentas básicas
 RUN apk add --no-cache bash
 
-# Define o diretório de trabalho da aplicação
 WORKDIR /app
 
-# Copia os arquivos de dependências e instala com Yarn
+# Copia apenas os arquivos de dependência
 COPY package.json yarn.lock ./
 RUN yarn install
 
-# Copia o restante do projeto
+# Copia o restante do projeto, exceto public/uploads
 COPY . .
 
-# Garante que a pasta public/uploads exista e tenha permissões adequadas
-RUN mkdir -p /app/public/uploads && \
-    chown -R node:node /app/public/uploads && \
-    chmod -R 775 /app/public/uploads
+# Garante que a pasta uploads exista, se não existir, e ajusta permissões
+RUN if [ ! -d /app/public/uploads ]; then \
+      mkdir -p /app/public/uploads; \
+    fi && \
+    chmod -R g+rwX /app/public/uploads && \
+    chown -R node:node /app/public/uploads
 
-# Compila o projeto, roda migrations e seeders
-RUN yarn build && \
-    node ace migration:run --force && \
-    node ace db:seed --force
+EXPOSE 3333
 
-# Expõe a porta usada pelo AdonisJS
-EXPOSE 3330
-
-# Comando de inicialização
-CMD ["node", "server.js"]
+# Inicia o servidor
+CMD ["yarn", "start"]
