@@ -1,0 +1,8 @@
+{
+  "server": {
+    "baseDir": ["./projects/atelie-emerson-garcia", "./index.html"]
+  },
+  "files": ["./projects/atelie-emerson-garcia/**/*.{html,htm,css,js}"],
+  "injectChanges": false,
+  "notify": true
+}
