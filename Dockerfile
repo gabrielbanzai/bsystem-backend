@@ -1,18 +1,29 @@
-# Etapa base com Node.js
 FROM node:18-alpine
 
-# Define diretório de trabalho
+# Instala bash e utilitários
+RUN apk add --no-cache bash
+
 WORKDIR /app
 
-# Copia apenas os arquivos de dependência e instala
-COPY package*.json ./
-RUN npm install --production
+# Copia apenas os arquivos de dependência e instala com Yarn
+COPY package.json yarn.lock ./
+RUN yarn install
 
-# Copia o restante do código da aplicação
+# Copia o restante do projeto (inclusive public, se quiser, ou ignora com .dockerignore)
 COPY . .
 
-# Expõe a porta padrão do AdonisJS
+# Garante que a pasta public/uploads exista e tenha as permissões corretas
+RUN mkdir -p /app/public/uploads && \
+    chown -R node:node /app/public/uploads && \
+    chmod -R 775 /app/public/uploads
+
+# Builda o projeto e executa migrations e seeders
+RUN yarn build && \
+    node ace migration:run --force && \
+    node ace db:seed --force
+
+# Expõe a porta do AdonisJS
 EXPOSE 3330
 
-# Comando de start (ajuste se estiver usando outro método)
+# Start da aplicação
 CMD ["node", "server.js"]
