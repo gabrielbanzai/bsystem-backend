@@ -17,7 +17,7 @@ RUN if [ ! -d /app/public ]; then \
       mkdir -p /app/public/uploads; \
     fi && \
     chmod -R g+rwX /app/public && \
-    chown -R deploy:deploy /app/public
+    chown -R node:node /app/public
 
 # Script para criar o DB, rodar migrations e seeds
 COPY entrypoint.sh /entrypoint.sh
