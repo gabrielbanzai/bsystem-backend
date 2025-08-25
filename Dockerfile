@@ -1,25 +1,30 @@
 FROM node:lts-alpine
 
-# Instala bash e ferramentas básicas
-RUN apk add --no-cache bash
+# Instala bash, MySQL client e ferramentas básicas
+RUN apk add --no-cache bash mysql-client
 
 WORKDIR /app
 
-# Copia apenas os arquivos de dependência
+# Copia arquivos de dependências
 COPY package.json yarn.lock ./
 RUN yarn install
 
 # Copia o restante do projeto, exceto public/uploads
 COPY . .
 
-# Garante que a pasta uploads exista, se não existir, e ajusta permissões
-RUN if [ ! -d /app/public/uploads ]; then \
+# Cria pasta public e uploads somente se não existirem
+RUN if [ ! -d /app/public ]; then \
       mkdir -p /app/public/uploads; \
     fi && \
-    chmod -R g+rwX /app/public/uploads && \
-    chown -R node:node /app/public/uploads
+    chmod -R g+rwX /app/public && \
+    chown -R deploy:deploy /app/public
 
-EXPOSE 3333
+# Script para criar o DB, rodar migrations e seeds
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Inicia o servidor
-CMD ["yarn", "start"]
+# Expõe porta da API
+EXPOSE 3001
+
+# Inicia entrypoint
+CMD ["/entrypoint.sh"]
