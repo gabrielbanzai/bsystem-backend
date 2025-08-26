@@ -1,18 +1,21 @@
 #!/bin/bash
 set -e
 
-# Cria o banco de dados se não existir
-echo "Criando database ${MYSQL_DB_NAME} se não existir..."
-mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" \
-  --default-auth=mysql_native_password \
+# 1. Usar ROOT para criar database e conceder permissões ao deploy
+echo "Configurando database ${MYSQL_DB_NAME}..."
+mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u root -p"$MYSQL_ROOT_PASSWORD" \
   --ssl=0 \
-  -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`;"
+  -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`; 
+      GRANT ALL PRIVILEGES ON \`$MYSQL_DB_NAME\`.* TO '$MYSQL_USER'@'%'; 
+      FLUSH PRIVILEGES;"
 
-# Roda migrations
+echo "✅ Database criado e permissões concedidas!"
+
+# 2. Roda migrations (agora com usuário deploy que já tem permissão)
 echo "Rodando migrations..."
 node ace migration:run
 
-# Roda seeders somente se a tabela _seeds estiver vazia
+# 3. Roda seeders somente se a tabela _seeds estiver vazia
 SEED_CHECK=$(node -e "
 const Database = require('@adonisjs/lucid/build/src/Database').Database
 Database.connection()
@@ -28,6 +31,6 @@ else
   echo "Seeders já rodados, pulando..."
 fi
 
-# Inicia a API
+# 4. Inicia a API
 echo "Iniciando servidor..."
 yarn start
