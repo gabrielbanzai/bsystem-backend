@@ -9,25 +9,12 @@ mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" \
   -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`;"
 
 # Já estamos na pasta /build
+
+# Roda migrations e aguarda terminar
 echo "Rodando migrations..."
 node ace migration:run --force
 
-# Aguardar um pouco extra para garantir que terminou
-sleep 3
-
-# Verifica se já rodou seeds
-SEED_MARKER="/.seeded"  # <- fora da pasta build
-if [ ! -f "$SEED_MARKER" ]; then
-    echo "✅ Rodando seeders pela primeira vez..."
-    
-    # Executa os seeders
-    node ace db:seed
-
-    # Cria arquivo de marcação fora da build para não rodar novamente
-    touch "$SEED_MARKER"
-else
-    echo "⚠️ Seeds já foram aplicadas anteriormente. Pulando..."
-fi
+echo "Migrations concluídas ✅"
 
 # Inicia a API diretamente do arquivo compilado
 echo "Iniciando servidor da pasta build..."
