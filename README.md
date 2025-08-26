@@ -65,8 +65,6 @@
     -   cd /etc/nginx/sites-enabled
     -   service nginx restart
 
-    Omg@1234Info
-
     ng build --base-href ./ --configuration=production
     ng build --base-href ./ --configuration=development
 
