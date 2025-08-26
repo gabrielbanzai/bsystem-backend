@@ -1,39 +1,36 @@
 FROM node:lts-alpine
 
-# Instala bash, MySQL client e Python para build tools
+# Instala bash, MySQL client e ferramentas de build
 RUN apk add --no-cache bash mysql-client python3 make g++
 
-WORKDIR /app
-
-# Copia arquivos de dependências
-COPY package.json yarn.lock ./
-RUN yarn install
-
-# Copia o restante do projeto
+# Copia todo o código fonte para a raiz
+WORKDIR /
 COPY . .
 
-# Faz o build da aplicação AdonisJS (cria /build como pasta irmã)
+# Instala dependências do projeto
+RUN yarn install
+
+# Gera a build do AdonisJS (vai criar /build na raiz)
 RUN node ace build --production
 
-# Copia o package.json para a pasta build
-RUN cp package.json ../build/
-
-# Muda para pasta build (pasta irmã, não filha)
+# Vai para a pasta build
 WORKDIR /build
 
-# Instala apenas dependências de produção
+# Copia package.json da raiz para /build
+COPY package.json /build/
+
+# Instala apenas dependências de produção na build
 RUN yarn install --production
 
-# Ajusta permissões nas pastas public e uploads que já existem na build
-RUN chmod -R g+rwX public && \
-    chown -R node:node public
+# Ajusta permissões na pasta public
+RUN chmod -R g+rwX public && chown -R node:node public
 
-# Script para criar o DB, rodar migrations e seeds
+# Copia entrypoint e dá permissão
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Expõe porta da API
+# Expõe a porta da API
 EXPOSE 3001
 
-# Inicia entrypoint
+# Inicia o entrypoint
 CMD ["/entrypoint.sh"]
