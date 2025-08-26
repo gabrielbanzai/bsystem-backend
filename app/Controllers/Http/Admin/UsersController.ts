@@ -57,9 +57,7 @@ export default class UsersController {
     const authServ : AuthService = new AuthService()
 
     try {
-        const { name, email, cpf_cnpj, trade_name, state_registration, phone, mobile_phone, contact_name, comission_percent, discount_percent, obs, comission_type, permissions, position_id, department_id } = await request.all()
-
-        const { birthday, address } = request.all()
+        const { name, email, cpf_cnpj, birthday, address, trade_name, state_registration, phone, mobile_phone, contact_name, comission_percent, discount_percent, obs, comission_type, permissions, position_id, department_id } = await request.all()
 
         const user = await User.create({
           name, email, cpf_cnpj, trade_name, state_registration, phone, mobile_phone, contact_name, comission_percent, discount_percent, comission_type, obs, position_id, department_id, birthday

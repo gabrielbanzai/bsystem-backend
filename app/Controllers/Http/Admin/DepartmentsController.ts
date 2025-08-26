@@ -39,9 +39,8 @@ export default class DepartmentsController {
         }
     }
 
-    async show(ctx: HttpContextContract) {
+    async show({ params : { id }, response }: HttpContextContract) {
         try {
-            const { params : { id }, response } = ctx
             const department = await where_slug_or_id(Department, id)
             await department.load('permissions')
             return response.status(200).send({data: department})
@@ -50,11 +49,10 @@ export default class DepartmentsController {
         }
     }
 
-    async update(ctx: HttpContextContract) {
+    async update({ params : { id }, request, response }: HttpContextContract) {
       const enServ: EntityService = new EntityService();
       const trx = await Database.beginGlobalTransaction()
         try {
-            const { params : { id }, request, response } = ctx
             const { name, permissions } = request.all()
             const department = await where_slug_or_id(Department, id, trx)
             if(!department){
@@ -75,9 +73,8 @@ export default class DepartmentsController {
         }
     }
 
-    async destroy(ctx: HttpContextContract) {
+    async destroy({ params : { id }, response }: HttpContextContract) {
         try {
-            const { params : { id }, response } = ctx
             const department = await where_slug_or_id(Department, id)
             await department.softDelete()
             return response.status(200).send({})

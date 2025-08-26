@@ -297,15 +297,17 @@ const prepare_filters = {
       })
     },
 
-    order(query, value, builder) {
-      let spl = value.split('-')
+    order(filter, query, value, builder) {
+      if(filter.field == 'order'){
+        let spl = value.split('-')
 
-      let field = spl[0]
-      let orientation = spl[1]
+        let field = spl[0]
+        let orientation = spl[1]
 
-      builder
-        ? builder.orderBy(field, orientation)
-        : query.orderBy(field, orientation)
+        builder
+          ? builder.orderBy(field, orientation)
+          : query.orderBy(field, orientation)
+      }
     },
 }
 

@@ -1,16 +1,18 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
-import { generate_filters_to_send, transform_pagination, where_slug_or_id } from 'App/Helpers'
+import { generate_filters_to_send, slug_parse, transform_pagination, where_slug_or_id } from 'App/Helpers'
 import Position from 'App/Models/Position'
-import EntityService from 'App/Services/EntityService'
 import PositionValidator from 'App/Validators/PositionValidator'
 
 export default class PositionsController {
 
     async index(ctx: HttpContextContract) {
         try {
-            let { response } = ctx
+            let { response, auth } = ctx
             let positions: any = Position.query().preload('department').preload('permissions')
+            if(auth.user && auth.user.id > 2){
+              positions.whereNotIn('id', [1,2])
+            }
             positions = await Position.listFiltersPaginate(ctx, positions)
             positions = transform_pagination(positions.toJSON())
             const filters = await generate_filters_to_send(Position)
@@ -20,14 +22,12 @@ export default class PositionsController {
         }
     }
 
-    async store(ctx: HttpContextContract) {
-        const enServ: EntityService = new EntityService();
-        let trx = await Database.beginGlobalTransaction()
+    async store({ request, response }: HttpContextContract) {
+        const trx = await Database.beginGlobalTransaction()
         try {
-            const { request, response } = ctx
-            const { name, department_id, permissions } = await request.validate(PositionValidator)
-            const position = await Position.create({name, department_id}, trx)
-            await enServ.slugfy('Position', position, trx)
+            const { name, permissions, department_id } = await request.validate(PositionValidator)
+            const slug: string = await slug_parse(name)
+            const position = await Position.create({name,slug,department_id})
             if(permissions && Array.isArray(permissions)){
                 await position.related('permissions').sync(permissions, undefined, trx)
             }
@@ -38,9 +38,8 @@ export default class PositionsController {
         }
     }
 
-    async show(ctx: HttpContextContract) {
+    async show({ params : { id }, response }: HttpContextContract) {
         try {
-            const { params : { id }, response } = ctx
             const position = await where_slug_or_id(Position, id)
             await position?.load('permissions')
             await position?.load('department', builder => {
@@ -52,41 +51,33 @@ export default class PositionsController {
         }
     }
 
-    async update(ctx: HttpContextContract) {
-      const enServ: EntityService = new EntityService();
-      const trx = await Database.beginGlobalTransaction()
+    async update({ params : { id }, request, response }: HttpContextContract) {
+        const trx = await Database.beginGlobalTransaction()
         try {
-            const { params : { id }, request, response } = ctx
-            const { name, department_id, permissions } = request.all()
+            const { name, department_id, permissions } = await request.validate(PositionValidator)
+            const slug: string = await slug_parse(name)
             const position = await where_slug_or_id(Position, id, trx)
-            if(!position){
-                return response.status(404).send({
-                    message: 'Cargo não encontrado'
-                })
-            }
-            position.merge({name, department_id})
-            await position.save(trx)
-            await enServ.slugfy('Position', position, trx)
+            position.merge({name, slug, department_id})
+            await position.save()
             if(permissions && Array.isArray(permissions)){
                 await position.related('permissions').sync(permissions, undefined, trx)
             }
             await trx.commit()
+            await position?.load('department')
             return response.status(200).send({data: position})
         } catch (error) {
             throw error
         }
     }
 
-    async destroy(ctx: HttpContextContract) {
+    async destroy({ params : { id }, response }: HttpContextContract) {
         try {
-            const { params : { id }, response } = ctx
             const position = await where_slug_or_id(Position, id)
             await position.softDelete()
             return response.status(200).send({})
         } catch (error) {
             throw error
         }
-
     }
 
 }

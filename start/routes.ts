@@ -200,6 +200,9 @@ Route.group(() => {
   //Serviços
   Route.post('/services/:id/confirm', 'Admin/ServicesController.confirm')
   Route.resource('/services', 'Admin/ServicesController')
+  
+  //Tipos de Serviços
+  Route.resource('/service-types', 'Admin/ServiceTypesController')
 
 }).prefix('/admin').middleware(['auth'])
 

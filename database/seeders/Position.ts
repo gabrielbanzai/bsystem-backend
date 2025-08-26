@@ -10,19 +10,38 @@ export default class extends BaseSeeder {
     })
 
     await Position.create({
-      name: 'Operador Júnior',
+      name: 'Operador júnior',
       slug: 'operador-junior'
     })
-
+    
     await Position.create({
-      name: 'Operador Pleno',
+      name: 'Operador pleno',
       slug: 'opreador-pleno'
     })
 
     await Position.create({
-      name: 'Operador Sênior',
+      name: 'Operador sênior',
       slug: 'opreador-senior'
     })
 
+    await Position.create({
+      name: 'Analista de financeiro',
+      slug: 'comprador'
+    })
+
+    await Position.create({
+      name: 'Comprador',
+      slug: 'comprador'
+    })
+
+    await Position.create({
+      name: 'Vendedor',
+      slug: 'vendedor'
+    })
+
+    await Position.create({
+      name: 'Técnico',
+      slug: 'tecnico'
+    })
   }
 }

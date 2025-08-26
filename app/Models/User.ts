@@ -20,34 +20,29 @@ export default class User extends BaseModel {
         field: 'name',
         placeholder: 'Nome',
         type: 'string',
-        cssColClass: 'col-md-4',
         isLike: true,
       },
       cpf_cnpj: {
         field: 'cpf_cnpj',
         placeholder: 'CPF/CNPJ',
-        cssColClass: 'col-md-4',
         type: 'string',
         isLike: true,
       },
       email: {
         field: 'email',
         placeholder: 'E-mail',
-        cssColClass: 'col-md-4',
         type: 'string',
         isLike: true,
       },
       position_id: {
         field: 'position_id',
         placeholder: 'Perfil',
-        cssColClass: 'col-md-4',
         type: 'dropdown',
         modelName: 'Position'
       },
       department_id: {
         field: 'department_id',
         placeholder: 'Departamento',
-        cssColClass: 'col-md-4',
         type: 'dropdown',
         modelName: 'Department'
       },
@@ -55,7 +50,6 @@ export default class User extends BaseModel {
         field: 'order',
         placeholder: 'Classificar',
         type: 'order',
-        cssColClass: 'col-md-4',
         options: [
           {
             name: 'Mais recentes',
