@@ -8,22 +8,25 @@ mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" \
   --ssl=0 \
   -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`;"
 
-# Roda migrations
+# Roda migrations e AGUARDA terminar
 echo "Rodando migrations..."
-node ace migration:run
+node ace migration:run --force
 
-# Verificação de seeders corrigida
-echo "Verificando seeders..."
-SEED_CHECK=$(node -pe "
-const Database = require('@ioc:Adonis/Lucid/Database')
-Database.from('adonis_schema_versions').select('*').then(r => r.length).catch(() => 0)
-" 2>/dev/null || echo "0")
+# Aguardar um pouco extra para garantir que terminou
+echo "Aguardando migrations completarem..."
+sleep 3
 
-if [ "$SEED_CHECK" -eq "0" ] || [ "$SEED_CHECK" = "0" ]; then
-  echo "Rodando seeders..."
+# Verificar se tabelas foram criadas antes de rodar seeders
+echo "Verificando se migrations completaram..."
+TABLE_CHECK=$(mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" \
+  --default-auth=mysql_native_password --ssl=0 \
+  -D "$MYSQL_DB_NAME" -e "SHOW TABLES LIKE 'users';" | wc -l)
+
+if [ "$TABLE_CHECK" -gt "1" ]; then
+  echo "✅ Migrations completadas! Rodando seeders..."
   node ace db:seed
 else
-  echo "Database já tem dados, pulando seeders..."
+  echo "❌ Tabelas não foram criadas. Pulando seeders."
 fi
 
 # Inicia a API
