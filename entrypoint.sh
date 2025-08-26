@@ -24,11 +24,18 @@ TABLE_CHECK=$(mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL
   --default-auth=mysql_native_password --ssl=0 \
   -D "$MYSQL_DB_NAME" -e "SHOW TABLES LIKE 'users';" | wc -l)
 
-if [ "$TABLE_CHECK" -gt "1" ]; then
-  echo "✅ Migrations completadas! Rodando seeders..."
-  node ace db:seed
+# Verifica se já rodou seeds
+SEED_MARKER=".seeded"
+if [ ! -f "$SEED_MARKER" ]; then
+    echo "✅ Rodando seeders pela primeira vez..."
+    
+    # Executa os seeders
+    node ace db:seed
+
+    # Cria arquivo de marcação para não rodar novamente
+    touch "$SEED_MARKER"
 else
-  echo "❌ Tabelas não foram criadas. Pulando seeders."
+    echo "⚠️ Seeds já foram aplicadas anteriormente. Pulando..."
 fi
 
 # Inicia a API diretamente do arquivo compilado
