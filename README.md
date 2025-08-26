@@ -46,6 +46,7 @@
     -   Criar diretório ~/app/server
     -   Baixar aplicação dentro da pasta server
 
+
 #####   Instalando PM2
     -   yarn global add pm2
     -   yarn global bin
