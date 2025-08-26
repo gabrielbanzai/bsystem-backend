@@ -1,4 +1,3 @@
-
 #!/bin/bash
 set -e
 
@@ -8,6 +7,9 @@ mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" \
   --default-auth=mysql_native_password \
   --ssl=0 \
   -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`;"
+
+# Vai para a pasta build onde está o código compilado
+cd /app/build
 
 # Roda migrations e AGUARDA terminar
 echo "Rodando migrations..."
@@ -30,6 +32,6 @@ else
   echo "❌ Tabelas não foram criadas. Pulando seeders."
 fi
 
-# Inicia a API
-echo "Iniciando servidor..."
-yarn start:server
+# Inicia a API diretamente do arquivo compilado
+echo "Iniciando servidor da pasta build..."
+node server.js

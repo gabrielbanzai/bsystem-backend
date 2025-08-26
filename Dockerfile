@@ -1,7 +1,7 @@
 FROM node:lts-alpine
 
-# Instala bash, MySQL client e ferramentas básicas
-RUN apk add --no-cache bash mysql-client
+# Instala bash, MySQL client e Python para build tools
+RUN apk add --no-cache bash mysql-client python3 make g++
 
 WORKDIR /app
 
@@ -9,8 +9,21 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install
 
-# Copia o restante do projeto, exceto public/uploads
+# Copia o restante do projeto
 COPY . .
+
+# Faz o build da aplicação AdonisJS
+RUN node ace build --production
+
+# Copia o package.json para a pasta build
+RUN cp package.json build/
+
+# Vai para pasta build e instala apenas dependências de produção
+WORKDIR /app/build
+RUN yarn install --production
+
+# Volta para pasta raiz para configurações finais
+WORKDIR /app
 
 # Cria pasta public e uploads somente se não existirem
 RUN if [ ! -d /app/public ]; then \
