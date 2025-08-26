@@ -418,7 +418,7 @@ class StockService {
       const newBalance = newQuantity - stock.quantity_reserved
       
       // Criar a transação de ajuste
-      const transaction = await StockTransaction.create({
+      await StockTransaction.create({
         quantity: Math.abs(difference),
         balance: newBalance,
         user_id: userId,
