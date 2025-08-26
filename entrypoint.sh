@@ -31,4 +31,4 @@ fi
 
 # Inicia a API
 echo "Iniciando servidor..."
-yarn start
+yarn start:server
