@@ -95,13 +95,13 @@ export default class ShippingCompaniesController {
                     shipping_companyAddress = await Address.create(address, trx)
                 }
                 shipping_company.merge({address_id: shipping_companyAddress.id})
-                await shipping_company.save(trx)
+                await shipping_company.save()
             } 
             // if(vehicles && Array.isArray(vehicles) && vehicles.length > 0){
             //     await shipping_company.related('vehicles').query().delete(trx)
             //     await shipping_company.related('vehicles').createMany(vehicles, trx)
             // }
-            await shipping_company.save(trx)
+            await shipping_company.save()
             await enServ.slugfy('ShippingCompany', shipping_company, trx)
             await trx.commit()
 

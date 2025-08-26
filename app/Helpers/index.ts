@@ -309,6 +309,71 @@ const prepare_filters = {
           : query.orderBy(field, orientation)
       }
     },
+
+    /**
+     * Global search filter - searches across multiple fields with OR logic
+     * Supports intelligent multi-term search (e.g., "mang pebd" finds "MANG. BEBEDOURO PEBD")
+     * @param filter - Filter configuration with searchFields array
+     * @param query - Database query builder
+     * @param value - Search term (can be multiple words)
+     * @param builder - Optional sub-query builder
+     */
+    global_search(filter, query, value, builder) {
+      if (!value || typeof value !== 'string' || value.trim() === '') {
+        return
+      }
+
+      const searchTerm = value.trim()
+      const target = builder || query
+      const searchFields = filter.searchFields || []
+
+      if (searchFields.length === 0) {
+        return
+      }
+
+      // Divide o termo de busca em palavras (removendo espaços extras)
+      const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0)
+      
+      // Se for busca exata (sem like) ou apenas uma palavra, usa o método original
+      if (filter.isLike === false || searchWords.length === 1) {
+        target.where((qb) => {
+          searchFields.forEach((field, index) => {
+            const condition = filter.isLike !== false 
+              ? ['LIKE', `%${searchTerm}%`]
+              : ['=', searchTerm]
+
+            if (index === 0) {
+              qb.where(field, ...condition)
+            } else {
+              qb.orWhere(field, ...condition)
+            }
+          })
+        })
+        return
+      }
+
+      // Busca inteligente: cada palavra deve existir em pelo menos um dos campos
+      target.where((qb) => {
+        searchWords.forEach((word, wordIndex) => {
+          const wordCondition = (subQb) => {
+            searchFields.forEach((field, fieldIndex) => {
+              if (fieldIndex === 0) {
+                subQb.where(field, 'LIKE', `%${word}%`)
+              } else {
+                subQb.orWhere(field, 'LIKE', `%${word}%`)
+              }
+            })
+          }
+          
+          if (wordIndex === 0) {
+            qb.where(wordCondition)
+          } else {
+            // AND: todas as palavras devem existir
+            qb.where(wordCondition)
+          }
+        })
+      })
+    },
 }
 
 export {

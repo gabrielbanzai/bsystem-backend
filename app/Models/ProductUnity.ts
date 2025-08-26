@@ -10,8 +10,9 @@ export default class ProductUnity extends BaseModel {
     return {
       name: {
         field: 'name',
-        placeholder: 'Nome',
-        type: 'string',
+        placeholder: 'Buscar categoria...',
+        type: 'global_search',
+        searchFields: ['name', 'slug'], // Campos onde a busca será feita
         isLike: true,
       },
       order: {

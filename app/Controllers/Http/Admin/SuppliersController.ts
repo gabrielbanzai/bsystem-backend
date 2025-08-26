@@ -86,9 +86,9 @@ export default class SuppliersController {
                     supplierAddress = await Address.create(address, trx)
                 }
                 supplier.merge({address_id: supplierAddress.id})
-                await supplier.save(trx)
+                await supplier.save()
             }
-            await supplier.save(trx)
+            await supplier.save()
             await enServ.slugfy('Supplier', supplier, trx)
             await trx.commit()
             await supplier.load('address')

@@ -85,9 +85,9 @@ export default class ClientsController {
                     clientAddress = await Address.create(address, trx)
                 }
                 client.merge({address_id: clientAddress.id})
-                await client.save(trx)
+                await client.save()
             }
-            await client.save(trx)
+            await client.save()
             await enServ.slugfy('Client', client, trx)
             await trx.commit()
             return response.status(200).send({data: client})

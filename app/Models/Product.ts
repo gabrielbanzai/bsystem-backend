@@ -16,34 +16,34 @@ export default class Product extends BaseModel {
 
   static get filters () {
     return {
-      search_string: {
-        field: 'search_string',
-        fields: ['name', 'id', 'reference', 'barcode'],
-        type: 'combo_search',
-        hideOnList: true,
-        isLike: true,
-      },
+      // search_string: {
+      //   field: 'search_string',
+      //   fields: ['name', 'id', 'reference', 'barcode'],
+      //   type: 'combo_search',
+      //   hideOnList: true,
+      //   isLike: true,
+      // },
       name: {
         field: 'name',
-        placeholder: 'Nome',
-        type: 'string',
-        cssColClass: 'col-md-6',
+        placeholder: 'Buscar produto...',
+        type: 'global_search',
+        searchFields: ['name', 'slug', 'reference', 'barcode'], // Campos onde a busca será feita
         isLike: true,
       },
-      reference: {
-        field: 'reference',
-        placeholder: 'Código',
-        type: 'string',
-        cssColClass: 'col-md-3',
-        isLike: true,
-      },
-      barcode: {
-        field: 'barcode',
-        placeholder: 'Código de barras',
-        type: 'string',
-        cssColClass: 'col-md-3',
-        isLike: true,
-      },
+      // reference: {
+      //   field: 'reference',
+      //   placeholder: 'Código',
+      //   type: 'string',
+      //   cssColClass: 'col-md-3',
+      //   isLike: true,
+      // },
+      // barcode: {
+      //   field: 'barcode',
+      //   placeholder: 'Código de barras',
+      //   type: 'string',
+      //   cssColClass: 'col-md-3',
+      //   isLike: true,
+      // },
       supplier_id: {
         field: 'supplier_id',
         placeholder: 'Fornecedor',

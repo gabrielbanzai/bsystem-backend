@@ -12,8 +12,9 @@ export default class Position extends BaseModel {
     return {
       name: {
         field: 'name',
-        placeholder: 'Nome',
-        type: 'string',
+        placeholder: 'Buscar cargos...',
+        type: 'global_search',
+        searchFields: ['name', 'slug'], // Campos onde a busca será feita
         isLike: true,
       },
       department_id: {

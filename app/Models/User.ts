@@ -18,20 +18,9 @@ export default class User extends BaseModel {
     return {
       name: {
         field: 'name',
-        placeholder: 'Nome',
-        type: 'string',
-        isLike: true,
-      },
-      cpf_cnpj: {
-        field: 'cpf_cnpj',
-        placeholder: 'CPF/CNPJ',
-        type: 'string',
-        isLike: true,
-      },
-      email: {
-        field: 'email',
-        placeholder: 'E-mail',
-        type: 'string',
+        placeholder: 'Buscar usuários...',
+        type: 'global_search',
+        searchFields: ['name', 'slug', 'cpf_cnpj', 'email'], // Campos onde a busca será feita
         isLike: true,
       },
       position_id: {

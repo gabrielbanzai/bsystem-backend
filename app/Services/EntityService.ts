@@ -4,6 +4,10 @@ import { slug_parse } from "App/Helpers";
 class EntityService {
   public async slugfy(modelName: string, entity: any, trx: TransactionClientContract | null = null){
 
+    if(trx){
+      console.log(`TRX-${Date.now()}`)
+    }
+
     let model: any = await import(`App/Models/${modelName}`)
 
     // Gerando o slug inicial (transformando o nome em slug)
@@ -23,7 +27,7 @@ class EntityService {
 
     entity.merge({slug: uniqueSlug})
 
-    await entity.save(trx)
+    await entity.save()
 
   }
 }

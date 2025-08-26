@@ -120,7 +120,7 @@ export default class UsersController {
           const { birthday, address } = request.all()
           const user = await where_slug_or_id(User, id, trx)
           user.merge({name, email, cpf_cnpj, trade_name, state_registration, phone, mobile_phone, contact_name, comission_percent, discount_percent, obs, comission_type, position_id, department_id, birthday})
-          await user.save(trx)
+          await user.save()
           await enServ.slugfy('User', user, trx)
 
           if(Array.isArray(permissions)){
@@ -137,7 +137,7 @@ export default class UsersController {
                 userAddress = await Address.create(address, trx)
             }
             user.merge({address_id: userAddress.id})
-            await user.save(trx)
+            await user.save()
           }
           await user.load('permissions')
           await user.load('department')
@@ -216,7 +216,7 @@ export default class UsersController {
           user.merge({avatar: avatar_url})
         }
 
-        await user.save(trx)
+        await user.save()
         await user.load('department', trx)
         await user.load('position', trx)
 

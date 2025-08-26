@@ -398,5 +398,133 @@ class StockService {
       await stock.save();
     }
   }
+
+  /**
+   * Ajusta a quantidade de estoque de um produto
+   * Cria uma transação de ajuste e atualiza o estoque
+   * @param stock - Instância do estoque a ser ajustado
+   * @param newQuantity - Nova quantidade do estoque
+   * @param reason - Motivo do ajuste
+   * @param userId - ID do usuário que está fazendo o ajuste
+   * @param trx - Transação do banco de dados
+   * @returns Stock - Estoque atualizado
+   */
+  public async adjustStock(stock: Stock, newQuantity: number, reason: string, userId: number, trx: any) {
+    try {
+      const oldQuantity = stock.quantity
+      const difference = newQuantity - oldQuantity
+      
+      // Calcular o novo saldo disponível (quantidade - reservas)
+      const newBalance = newQuantity - stock.quantity_reserved
+      
+      // Criar a transação de ajuste
+      const transaction = await StockTransaction.create({
+        quantity: Math.abs(difference),
+        balance: newBalance,
+        user_id: userId,
+        type: 'adjust',
+        reason: reason,
+        product_id: stock.product_id,
+        stock_id: stock.id
+      }, trx)
+      
+      // Atualizar o estoque com a nova quantidade
+      stock.merge({
+        quantity: newQuantity
+      })
+      
+      await stock.save()
+      
+      // Log da operação
+      console.log(`Estoque ajustado: Produto ${stock.product_id}, de ${oldQuantity} para ${newQuantity} (${difference >= 0 ? '+' : ''}${difference})`)
+      
+      return stock
+      
+    } catch (error) {
+      console.error('Erro no ajuste de estoque:', error)
+      throw new Error('Falha ao processar ajuste de estoque')
+    }
+  }
+
+  /**
+   * Transfere quantidade de estoque entre dois armazéns
+   * Cria duas transações: uma de saída no estoque origem e uma de entrada no estoque destino
+   * @param sourceStock - Estoque de origem
+   * @param targetStorageId - ID do armazém de destino
+   * @param quantity - Quantidade a ser transferida
+   * @param reason - Motivo da transferência
+   * @param userId - ID do usuário que está fazendo a transferência
+   * @param trx - Transação do banco de dados
+   * @returns {sourceStock, targetStock} - Estoques atualizados
+   */
+  public async transferStock(sourceStock: Stock, targetStorageId: number, quantity: number, reason: string, userId: number, trx: any) {
+    try {
+      // Verificar se há quantidade suficiente disponível (não reservada)
+      const availableQuantity = sourceStock.quantity - sourceStock.quantity_reserved
+      if (quantity > availableQuantity) {
+        throw new Error(`Quantidade insuficiente disponível. Disponível: ${availableQuantity}, Solicitado: ${quantity}`)
+      }
+
+      // Buscar ou criar o estoque de destino
+      let targetStock = await Stock.query(trx)
+        .where('product_id', sourceStock.product_id)
+        .where('storage_id', targetStorageId)
+        .first()
+
+      if (!targetStock) {
+        // Criar novo estoque no armazém de destino
+        targetStock = await Stock.create({
+          product_id: sourceStock.product_id,
+          storage_id: targetStorageId,
+          quantity: 0,
+          quantity_reserved: 0
+        }, trx)
+      }
+
+      // Calcular novos saldos
+      const newSourceQuantity = sourceStock.quantity - quantity
+      const newTargetQuantity = targetStock.quantity + quantity
+      const newSourceBalance = newSourceQuantity - sourceStock.quantity_reserved
+      const newTargetBalance = newTargetQuantity - targetStock.quantity_reserved
+
+      // Criar transação de saída no estoque origem
+      await StockTransaction.create({
+        quantity: quantity,
+        balance: newSourceBalance,
+        user_id: userId,
+        type: 'transfer',
+        reason: `${reason} - Saída para armazém ${targetStorageId}`,
+        product_id: sourceStock.product_id,
+        stock_id: sourceStock.id
+      }, trx)
+
+      // Criar transação de entrada no estoque destino
+      await StockTransaction.create({
+        quantity: quantity,
+        balance: newTargetBalance,
+        user_id: userId,
+        type: 'transfer',
+        reason: `${reason} - Entrada do armazém ${sourceStock.storage_id}`,
+        product_id: targetStock.product_id,
+        stock_id: targetStock.id
+      }, trx)
+
+      // Atualizar as quantidades dos estoques
+      sourceStock.merge({ quantity: newSourceQuantity })
+      targetStock.merge({ quantity: newTargetQuantity })
+
+      await sourceStock.save()
+      await targetStock.save()
+
+      // Log da operação
+      console.log(`Transferência realizada: Produto ${sourceStock.product_id}, ${quantity} unidades do armazém ${sourceStock.storage_id} para ${targetStorageId}`)
+
+      return { sourceStock, targetStock }
+
+    } catch (error) {
+      console.error('Erro na transferência de estoque:', error)
+      throw new Error('Falha ao processar transferência de estoque: ' + error.message)
+    }
+  }
 }
 export default StockService

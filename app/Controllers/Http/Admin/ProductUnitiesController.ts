@@ -55,7 +55,7 @@ export default class ProductUnitiesController {
                 })
             }
             product_unity.merge({name, abbreviation, plural})
-            await product_unity.save(trx)
+            await product_unity.save()
             await enServ.slugfy('ProductUnity', product_unity, trx)
             await trx.commit()
             return response.status(200).send({data: product_unity})

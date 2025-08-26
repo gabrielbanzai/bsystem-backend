@@ -56,7 +56,7 @@ export default class VehiclesController {
             const { name, brand, model, plate, fb_year, quilometer, shipping_company_id } = await request.all()
             const vehicle = await where_slug_or_id(Vehicle, id)
             vehicle?.merge({name, brand, model, plate, fb_year, quilometer, shipping_company_id})
-            await vehicle?.save(trx)
+            await vehicle?.save()
 
             await enServ.slugfy('Vehicle', vehicle, trx)
             await trx.commit()

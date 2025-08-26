@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.integer('quantity')
       table.integer('balance')
       table.text('reason')
-      table.enum('type', ['in', 'out', 'adjust', 'reserve', 'reserve-adjust', 'reserve-cancel'])
+      table.enum('type', ['in', 'out', 'adjust', 'reserve', 'reserve-adjust', 'reserve-cancel', 'transfer'])
       table.integer('product_id').unsigned().references('id').inTable('products').onDelete('SET NULL').defaultTo(null)
       table.integer('stock_id').unsigned().references('id').inTable('stocks').onDelete('SET NULL').defaultTo(null)
       table.integer('purchase_order_id').unsigned().references('id').inTable('purchase_orders').onDelete('SET NULL').defaultTo(null)

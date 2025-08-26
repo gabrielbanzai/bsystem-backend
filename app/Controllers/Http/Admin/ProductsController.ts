@@ -168,7 +168,7 @@ export default class ProductsController {
             product_category_id,
             })
 
-            await product.save(trx)
+            await product.save()
             await enServ.slugfy('Product', product, trx)
 
             if (Array.isArray(suppliers)) {
@@ -185,7 +185,7 @@ export default class ProductsController {
                 }, { client: trx })
             }
 
-            await product.save(trx)
+            await product.save()
 
             await trx.commit()
 

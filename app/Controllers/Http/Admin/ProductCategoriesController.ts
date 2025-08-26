@@ -55,7 +55,7 @@ export default class ProductCategoriesController {
                 })
             }
             product_category.merge({name})
-            await product_category.save(trx)
+            await product_category.save()
             await enServ.slugfy('ProductCategory', product_category, trx)
             await trx.commit()
             return response.status(200).send({data: product_category})

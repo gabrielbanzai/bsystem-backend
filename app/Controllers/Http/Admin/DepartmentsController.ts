@@ -61,7 +61,7 @@ export default class DepartmentsController {
                 })
             }
             department.merge({name})
-            await department.save(trx)
+            await department.save()
             await enServ.slugfy('Department', department, trx)
             if(permissions && Array.isArray(permissions)){
                 await department.related('permissions').sync(permissions, undefined, trx)

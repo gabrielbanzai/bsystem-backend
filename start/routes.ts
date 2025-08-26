@@ -150,7 +150,11 @@ Route.group(() => {
   Route.get('/products-report', 'Admin/ProductsController.report')
 
   //Estoque
-  Route.get('/stocks/:id', 'Admin/StocksController.index')
+  Route.get('/stocks/search', 'Admin/StocksController.search') // Nova rota para autocomplete
+  Route.get('/stocks/search-products', 'Admin/StocksController.searchProducts') // Rota para busca específica de produtos (ficha de estoque)
+  Route.get('/stocks', 'Admin/StocksController.index') // Listagem geral de estoques (lista de estoques)
+  Route.patch('/stocks/:id/adjust', 'Admin/StocksController.adjust') // Ajustar estoque
+  Route.patch('/stocks/:id/transfer', 'Admin/StocksController.transfer') // Transferir estoque
 
   //Armazenamentos
   Route.get('/storages', 'Admin/StoragesController.index')

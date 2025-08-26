@@ -12,8 +12,9 @@ export default class Department extends BaseModel {
     return {
       name: {
         field: 'name',
-        placeholder: 'Nome',
-        type: 'string',
+        placeholder: 'Buscar departamentos...',
+        type: 'global_search',
+        searchFields: ['name', 'slug'], // Campos onde a busca será feita
         isLike: true,
       },
       order: {

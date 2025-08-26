@@ -55,7 +55,7 @@ export default class ProductGroupsController {
                 })
             }
             product_group.merge({name})
-            await product_group.save(trx)
+            await product_group.save()
             await enServ.slugfy('ProductGroup', product_group, trx)
             await trx.commit()
             return response.status(200).send({data: product_group})
