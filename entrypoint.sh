@@ -3,31 +3,25 @@ set -e
 
 # Cria o banco de dados se não existir
 echo "Criando database ${MYSQL_DB_NAME} se não existir..."
-mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" \
-  --default-auth=mysql_native_password \
+mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u root -p"$MYSQL_ROOT_PASSWORD" \
   --ssl=0 \
-  -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`;"
+  -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`; 
+      GRANT ALL PRIVILEGES ON \`$MYSQL_DB_NAME\`.* TO '$MYSQL_USER'@'%'; 
+      FLUSH PRIVILEGES;"
 
-# Roda migrations
 echo "Rodando migrations..."
 node ace migration:run
 
-# Roda seeders somente se a tabela _seeds estiver vazia
-SEED_CHECK=$(node -e "
-const Database = require('@adonisjs/lucid/build/src/Database').Database
-Database.connection()
-  .from('_seeds')
-  .count('* as total')
-  .then(res => console.log(res[0].total))
-  .finally(() => Database.manager.closeAll())
-")
-if [ "$SEED_CHECK" -eq "0" ]; then
+# CORREÇÃO: Verificar seeders de forma mais simples
+echo "Verificando se seeders já foram executados..."
+SEED_COUNT=$(node ace db:seed --show 2>/dev/null | wc -l || echo "0")
+
+if [ "$SEED_COUNT" -eq "0" ]; then
   echo "Rodando seeders..."
   node ace db:seed
 else
-  echo "Seeders já rodados, pulando..."
+  echo "Seeders já executados, pulando..."
 fi
 
-# Inicia a API
 echo "Iniciando servidor..."
 yarn start
