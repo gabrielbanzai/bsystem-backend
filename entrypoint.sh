@@ -8,8 +8,7 @@ mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" \
   --ssl=0 \
   -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`;"
 
-# Vai para a pasta build onde está o código compilado
-cd /app/build
+# Já estamos na pasta /build
 
 # Roda migrations e AGUARDA terminar
 echo "Rodando migrations..."

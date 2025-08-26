@@ -12,25 +12,21 @@ RUN yarn install
 # Copia o restante do projeto
 COPY . .
 
-# Faz o build da aplicação AdonisJS
+# Faz o build da aplicação AdonisJS (cria /build como pasta irmã)
 RUN node ace build --production
 
 # Copia o package.json para a pasta build
-RUN cp package.json build/
+RUN cp package.json ../build/
 
-# Vai para pasta build e instala apenas dependências de produção
-WORKDIR /app/build
+# Muda para pasta build (pasta irmã, não filha)
+WORKDIR /build
+
+# Instala apenas dependências de produção
 RUN yarn install --production
 
-# Volta para pasta raiz para configurações finais
-WORKDIR /app
-
-# Cria pasta public e uploads somente se não existirem
-RUN if [ ! -d /app/public ]; then \
-      mkdir -p /app/public/uploads; \
-    fi && \
-    chmod -R g+rwX /app/public && \
-    chown -R node:node /app/public
+# Ajusta permissões nas pastas public e uploads que já existem na build
+RUN chmod -R g+rwX public && \
+    chown -R node:node public
 
 # Script para criar o DB, rodar migrations e seeds
 COPY entrypoint.sh /entrypoint.sh
