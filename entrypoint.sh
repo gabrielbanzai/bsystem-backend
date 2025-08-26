@@ -2,8 +2,11 @@
 set -e
 
 # Cria o banco de dados se não existir
-echo "Criando database ${DB_NAME} se não existir..."
-mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;"
+echo "Criando database ${MYSQL_DB_NAME} se não existir..."
+mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" \
+  --default-auth=mysql_native_password \
+  --ssl=0 \
+  -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB_NAME\`;"
 
 # Roda migrations
 echo "Rodando migrations..."
